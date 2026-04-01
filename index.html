@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Graduation Photo Booth Layers</title>
+  <style>
+    :root {
+      --bg: #100b14;
+      --bg-soft: #1f1527;
+      --paper: #fff5e8;
+      --paper-soft: #f8ead7;
+      --text: #fff7ef;
+      --muted: rgba(255, 247, 239, 0.72);
+      --ink: #2b1d24;
+      --line: rgba(255, 255, 255, 0.12);
+      --accent: #ffc391;
+      --accent-strong: #ff9e8d;
+      --peach: #ffe0bb;
+      --shadow: 0 34px 90px rgba(0, 0, 0, 0.34);
+      --radius: 30px;
+      --radius-soft: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      color-scheme: dark;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(255, 195, 145, 0.18), transparent 22%),
+        radial-gradient(circle at 88% 14%, rgba(255, 158, 141, 0.16), transparent 18%),
+        radial-gradient(circle at 50% 96%, rgba(255, 245, 232, 0.08), transparent 30%),
+        linear-gradient(140deg, #0f0a13 0%, #1b1222 45%, #0f1422 100%);
+      overflow-x: hidden;
+    }
+
+    button,
+    input,
+    textarea {
+      font: inherit;
+    }
+
+    img {
+      display: block;
+      max-width: 100%;
+    }
+
+    .light-leak,
+    .grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .light-leak {
+      background:
+        radial-gradient(circle at 10% 0%, rgba(255, 195, 145, 0.24), transparent 24%),
+        radial-gradient(circle at 90% 18%, rgba(255, 158, 141, 0.18), transparent 20%),
+        radial-gradient(circle at 48% 82%, rgba(255, 245, 232, 0.07), transparent 26%);
+      mix-blend-mode: screen;
+      opacity: 0.94;
+      z-index: 0;
+    }
+
+    .grain {
+      z-index: 0;
+      opacity: 0.08;
+      background-image:
+        linear-gradient(transparent 0 48%, rgba(255, 255, 255, 0.05) 48% 52%, transparent 52% 100%),
+        radial-gradient(circle, rgba(255, 255, 255, 0.2) 1px, transparent 1px);
+      background-size: 100% 5px, 13px 13px;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      width: min(1180px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 1rem 0 2rem;
+    }
+
+    .topbar,
+    .intro-ribbon,
+    .layer-nav,
+    .stage-wrap,
+    .footer-actions {
+      opacity: 1;
+    }
+
+    body.is-ready .topbar,
+    body.is-ready .intro-ribbon,
+    body.is-ready .layer-nav,
+    body.is-ready .stage-wrap,
+    body.is-ready .footer-actions {
+      animation: fade-up 0.72s ease both;
+    }
+
+    body.is-ready .intro-ribbon {
+      animation-delay: 0.06s;
+    }
+
+    body.is-ready .layer-nav {
+      animation-delay: 0.12s;
+    }
+
+    body.is-ready .stage-wrap {
+      animation-delay: 0.18s;
+    }
+
+    body.is-ready .footer-actions {
+      animation-delay: 0.24s;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.8rem 0 1rem;
+    }
+
+    .brand-copy,
+    .toolbar,
+    .intro-meta,
+    .layer-nav,
+    .footer-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      align-items: center;
+    }
+
+    .brand-copy {
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .brand-kicker,
+    .brand-subline,
+    .eyebrow,
+    .mini-note,
+    .photo-credit {
+      margin: 0;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.74rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .toolbar {
+      justify-content: flex-end;
+    }
+
+    .intro-ribbon,
+    .stage-wrap,
+    .footer-actions {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(255, 245, 232, 0.09), rgba(255, 245, 232, 0.05));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .intro-ribbon {
+      border-radius: calc(var(--radius) + 4px);
+      padding: clamp(1.2rem, 3vw, 1.7rem);
+      display: grid;
+      gap: 1rem;
+    }
+
+    .intro-ribbon h1,
+    .layer-copy h2,
+    .note-sheet h3,
+    .final-card h3 {
+      margin: 0;
+      line-height: 0.96;
+      letter-spacing: -0.04em;
+    }
+
+    .intro-ribbon h1 {
+      max-width: 11ch;
+      font-size: clamp(2.8rem, 8vw, 5.6rem);
+    }
+
+    .intro-ribbon p {
+      margin: 0;
+    }
+
+    .intro-text {
+      max-width: 42rem;
+      font-size: clamp(1rem, 2vw, 1.1rem);
+      line-height: 1.75;
+      color: var(--muted);
+    }
+
+    .pill,
+    .toolbar-button,
+    .nav-button,
+    .footer-button,
+    .layer-action,
+    .chip {
+      min-height: 2.9rem;
+      padding: 0.8rem 1.1rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 245, 232, 0.08);
+      color: var(--text);
+      cursor: pointer;
+      transition:
+        transform 0.24s ease,
+        background-color 0.24s ease,
+        border-color 0.24s ease,
+        opacity 0.24s ease;
+    }
+
+    .toolbar-button:hover,
+    .nav-button:hover,
+    .footer-button:hover,
+    .layer-action:hover {
+      transform: translateY(-1px);
+    }
+
+    .toolbar-button.is-active,
+    .nav-button.is-active {
+      background: rgba(255, 195, 145, 0.16);
+      border-color: rgba(255, 195, 145, 0.45);
+    }
+
+    .toolbar-button--primary,
+    .footer-button--primary,
+    .layer-action--primary {
+      background: linear-gradient(135deg, #ffd7a9, #ffad98);
+      color: var(--ink);
+      border-color: transparent;
+      font-weight: 700;
+    }
+
+    .nav-button {
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.76rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .nav-button[aria-current="true"] {
+      background: rgba(255, 245, 232, 0.16);
+      border-color: rgba(255, 245, 232, 0.38);
+    }
+
+    .stage-wrap {
+      position: relative;
+      margin-top: 1rem;
+      min-height: 780px;
+      border-radius: calc(var(--radius) + 8px);
+      overflow: hidden;
+      perspective: 1800px;
+    }
+
+    .stage {
+      position: relative;
+      min-height: 780px;
+      padding: clamp(1rem, 3vw, 1.5rem);
+    }
+
+    .layer {
+      position: absolute;
+      inset: clamp(1rem, 3vw, 1.5rem);
+      display: grid;
+      grid-template-columns: minmax(0, 1.06fr) minmax(300px, 0.94fr);
+      gap: clamp(1rem, 3vw, 1.5rem);
+      padding: clamp(1rem, 3vw, 1.5rem);
+      border-radius: var(--radius);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background:
+        linear-gradient(180deg, rgba(255, 245, 232, 0.08), rgba(255, 245, 232, 0.04)),
+        linear-gradient(145deg, #1d1424, #111522);
+      opacity: 0;
+      pointer-events: none;
+      transform: translate3d(0, 34px, -140px) scale(0.96);
+      transition:
+        opacity 0.55s ease,
+        transform 0.72s cubic-bezier(0.2, 0.8, 0.2, 1),
+        filter 0.55s ease;
+      overflow: auto;
+    }
+
+    .layer.is-active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translate3d(0, 0, 80px) scale(1);
+      z-index: 3;
+    }
+
+    .layer.is-past {
+      opacity: 0.18;
+      transform: translate3d(-60px, -24px, -160px) scale(0.93);
+      filter: blur(4px);
+      z-index: 1;
+    }
+
+    .layer.is-future {
+      opacity: 0.3;
+      transform: translate3d(60px, 24px, -120px) scale(0.95);
+      filter: blur(2px);
+      z-index: 2;
+    }
+
+    .media-panel,
+    .layer-copy,
+    .note-sheet,
+    .photo-column,
+    .final-card {
+      position: relative;
+    }
+
+    .media-panel {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .hero-photo,
+    .photo-card,
+    .photo-stack-card,
+    .note-portrait,
+    .final-photo {
+      position: relative;
+      overflow: hidden;
+      border-radius: 26px;
+      box-shadow: 0 22px 40px rgba(0, 0, 0, 0.22);
+      background: rgba(255, 245, 232, 0.08);
+    }
+
+    .hero-photo,
+    .final-photo {
+      min-height: 420px;
+    }
+
+    .hero-photo img,
+    .photo-card img,
+    .photo-stack-card img,
+    .note-portrait img,
+    .final-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .photo-overlay,
+    .final-overlay {
+      position: absolute;
+      inset: auto 0 0;
+      padding: 1.1rem 1.2rem;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.7));
+    }
+
+    .photo-overlay strong,
+    .final-overlay strong {
+      display: block;
+      margin-bottom: 0.3rem;
+      font-size: 1.25rem;
+    }
+
+    .photo-overlay span,
+    .final-overlay span {
+      font-size: 0.98rem;
+      line-height: 1.6;
+      color: rgba(255, 247, 239, 0.82);
+    }
+
+    .strip-grid,
+    .stack-grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .strip-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .stack-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .photo-card,
+    .photo-stack-card,
+    .note-portrait {
+      min-height: 230px;
+    }
+
+    .photo-card::after,
+    .photo-stack-card::after,
+    .note-portrait::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255, 245, 232, 0.03), rgba(0, 0, 0, 0.05));
+      pointer-events: none;
+    }
+
+    .layer-copy,
+    .note-sheet,
+    .final-card {
+      display: grid;
+      gap: 1rem;
+      align-content: center;
+    }
+
+    .eyebrow {
+      margin: 0;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.78rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .layer-copy h2,
+    .note-sheet h3,
+    .final-card h3 {
+      font-size: clamp(2.1rem, 5vw, 3.5rem);
+    }
+
+    .body-copy,
+    .note-sheet p,
+    .final-card p {
+      margin: 0;
+      font-size: 1.02rem;
+      line-height: 1.8;
+      color: var(--muted);
+    }
+
+    .chip-row,
+    .layer-actions,
+    .note-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .chip {
+      min-height: auto;
+      padding: 0.5rem 0.75rem;
+      cursor: default;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .note-sheet {
+      padding: clamp(1.2rem, 3vw, 1.6rem);
+      border-radius: 26px;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(255, 245, 232, 0.98), rgba(248, 234, 215, 0.98)),
+        linear-gradient(90deg, rgba(255, 158, 141, 0.12), transparent 35%);
+      box-shadow: 0 22px 40px rgba(0, 0, 0, 0.16);
+    }
+
+    .note-sheet::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          transparent 0,
+          transparent 35px,
+          rgba(116, 93, 79, 0.1) 35px,
+          rgba(116, 93, 79, 0.1) 36px
+        );
+      pointer-events: none;
+      opacity: 0.65;
+    }
+
+    .note-sheet > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .note-sheet p {
+      color: rgba(43, 29, 36, 0.82);
+    }
+
+    .note-sheet .eyebrow {
+      color: rgba(43, 29, 36, 0.58);
+    }
+
+    .signature {
+      display: grid;
+      gap: 0.25rem;
+      padding-top: 0.2rem;
+    }
+
+    .signature strong {
+      font-size: 1.02rem;
+    }
+
+    .quote-card {
+      padding: 1rem 1.1rem;
+      border-radius: var(--radius-soft);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 245, 232, 0.06);
+    }
+
+    .quote-card p {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.75;
+      color: var(--muted);
+    }
+
+    .footer-actions {
+      justify-content: space-between;
+      margin-top: 1rem;
+      padding: 0.9rem;
+      border-radius: 999px;
+    }
+
+    .footer-button[disabled] {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .photo-credit {
+      color: rgba(255, 247, 239, 0.62);
+    }
+
+    @keyframes fade-up {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 980px) {
+      .layer {
+        grid-template-columns: 1fr;
+      }
+
+      .strip-grid,
+      .stack-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stage-wrap,
+      .stage {
+        min-height: 980px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .app {
+        width: min(100%, calc(100% - 1rem));
+      }
+
+      .topbar,
+      .toolbar,
+      .layer-nav,
+      .footer-actions,
+      .note-actions,
+      .layer-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .toolbar-button,
+      .nav-button,
+      .footer-button,
+      .layer-action {
+        width: 100%;
+      }
+
+      .footer-actions {
+        border-radius: 30px;
+      }
+
+      .stage-wrap,
+      .stage {
+        min-height: 1120px;
+      }
+
+      .layer {
+        inset: 0.8rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition-duration: 0.01ms !important;
+        transition-delay: 0ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="light-leak" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <audio data-bg-music autoplay loop preload="auto" playsinline>
+    <source src="https://download.samplelib.com/mp3/sample-15s.mp3" type="audio/mpeg">
+  </audio>
+
+  <main class="app">
+    <header class="topbar">
+      <div class="brand-copy">
+        <p class="brand-kicker">Graduation Photo Booth</p>
+        <p class="brand-subline">One file, external photos, layered buttons, ready for GitHub Pages</p>
+      </div>
+
+      <div class="toolbar">
+        <button class="toolbar-button toolbar-button--primary" type="button" data-music-toggle aria-pressed="false">Music Loading</button>
+        <button class="toolbar-button" type="button" data-copy-note>Copy Message</button>
+      </div>
+    </header>
+
+    <section class="intro-ribbon">
+      <p class="eyebrow">External pictures / layered layout / English graduation note</p>
+      <h1>One graduation, four little layers, and a song trying to play right away.</h1>
+      <p class="intro-text">
+        Dear <span data-recipient></span>, this page is built like a tiny photo booth story. Use the layer buttons,
+        move through the memories, copy the message, and keep the whole thing as a single index.html file ready to upload to GitHub.
+      </p>
+
+      <div class="intro-meta" aria-hidden="true">
+        <span class="chip">autoplay music</span>
+        <span class="chip">external image urls</span>
+        <span class="chip">mobile friendly</span>
+        <span class="chip">github pages ready</span>
+      </div>
+    </section>
+
+    <nav class="layer-nav" aria-label="Layer navigation">
+      <button class="nav-button is-active" type="button" data-target="0" aria-current="true">Layer 01</button>
+      <button class="nav-button" type="button" data-target="1">Layer 02</button>
+      <button class="nav-button" type="button" data-target="2">Layer 03</button>
+      <button class="nav-button" type="button" data-target="3">Layer 04</button>
+    </nav>
+
+    <section class="stage-wrap">
+      <div class="stage">
+        <article class="layer is-active" data-layer-panel="0">
+          <div class="media-panel">
+            <figure class="hero-photo">
+              <img data-photo="0" src="" alt="">
+              <figcaption class="photo-overlay">
+                <strong>Layer 01</strong>
+                <span>The first flash of the day belongs to your proudest smile.</span>
+              </figcaption>
+            </figure>
+
+            <p class="photo-credit">Photos load from Unsplash with external URLs, so this one file stays easy to upload.</p>
+          </div>
+
+          <div class="layer-copy">
+            <p class="eyebrow">Layer 01 / the spotlight</p>
+            <h2>Dear <span data-recipient></span>, today looks so good on you.</h2>
+            <p class="body-copy">
+              This layer is the opening frame: warm light, graduation energy, and a page made to say
+              that all your effort finally turned into something visible and beautiful.
+            </p>
+
+            <div class="chip-row" aria-hidden="true">
+              <span class="chip">class of <span data-year></span></span>
+              <span class="chip">flash ready</span>
+              <span class="chip">best friend mode</span>
+            </div>
+
+            <div class="layer-actions">
+              <button class="layer-action layer-action--primary" type="button" data-next>Open Layer 02</button>
+              <button class="layer-action" type="button" data-target="2">Jump to Letter</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="layer" data-layer-panel="1" aria-hidden="true">
+          <div class="media-panel">
+            <div class="strip-grid">
+              <figure class="photo-card">
+                <img data-photo="1" src="" alt="">
+              </figure>
+              <figure class="photo-card">
+                <img data-photo="2" src="" alt="">
+              </figure>
+              <figure class="photo-card">
+                <img data-photo="3" src="" alt="">
+              </figure>
+            </div>
+
+            <div class="quote-card">
+              <p>
+                Three quick flashes: the stage, the cap toss, and the little afterglow where the future starts to feel real.
+              </p>
+            </div>
+          </div>
+
+          <div class="layer-copy">
+            <p class="eyebrow">Layer 02 / the strip</p>
+            <h2>Little frames, big feelings, one unforgettable graduation day.</h2>
+            <p class="body-copy">
+              This layer works like a printed photo strip. Each external picture gives the page a more real photo booth feel,
+              while the buttons keep it easy to explore on desktop and mobile.
+            </p>
+
+            <div class="layer-actions">
+              <button class="layer-action" type="button" data-prev>Back</button>
+              <button class="layer-action layer-action--primary" type="button" data-next>Open Layer 03</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="layer" data-layer-panel="2" aria-hidden="true">
+          <div class="media-panel stack-grid">
+            <figure class="note-portrait">
+              <img data-photo="4" src="" alt="">
+            </figure>
+
+            <aside class="note-sheet">
+              <p class="eyebrow">Layer 03 / the letter</p>
+              <h3>Congratulations on your graduation, <span data-recipient></span>.</h3>
+
+              <p data-line="0"></p>
+              <p data-line="1"></p>
+              <p data-line="2"></p>
+
+              <div class="signature">
+                <span>With love and so much pride,</span>
+                <strong data-sender></strong>
+              </div>
+
+              <div class="note-actions">
+                <button class="layer-action layer-action--primary" type="button" data-copy-note>Copy Message</button>
+                <button class="layer-action" type="button" data-next>Open Layer 04</button>
+              </div>
+            </aside>
+          </div>
+
+          <div class="layer-copy">
+            <p class="eyebrow">Layer 03 / the words</p>
+            <h2>The message stays simple, warm, and easy to edit.</h2>
+            <p class="body-copy">
+              If you want to personalize the page later, you only need to change the config in the JavaScript section.
+              The names, year, message, and external photo URLs all live in one place.
+            </p>
+
+            <div class="chip-row" aria-hidden="true">
+              <span class="chip">copy to clipboard</span>
+              <span class="chip">single html file</span>
+              <span class="chip">easy to customize</span>
+            </div>
+
+            <div class="layer-actions">
+              <button class="layer-action" type="button" data-prev>Back</button>
+              <button class="layer-action" type="button" data-target="0">Go to Start</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="layer" data-layer-panel="3" aria-hidden="true">
+          <div class="media-panel">
+            <figure class="final-photo">
+              <img data-photo="5" src="" alt="">
+              <figcaption class="final-overlay">
+                <strong>Layer 04</strong>
+                <span>One last frame for the friend who really did it.</span>
+              </figcaption>
+            </figure>
+          </div>
+
+          <div class="final-card">
+            <p class="eyebrow">Layer 04 / the finish</p>
+            <h3>Your future already feels bright.</h3>
+            <p>
+              This last layer closes the page with one big reminder: your graduation is not only an ending.
+              It is the first clean, glowing frame of everything waiting for you next.
+            </p>
+
+            <div class="layer-actions">
+              <button class="layer-action layer-action--primary" type="button" data-reset>Play Again</button>
+              <button class="layer-action" type="button" data-copy-note>Copy Message</button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <footer class="footer-actions">
+      <button class="footer-button" type="button" data-prev-global>Previous Layer</button>
+      <button class="footer-button footer-button--primary" type="button" data-next-global>Next Layer</button>
+      <button class="footer-button" type="button" data-reset>Restart Story</button>
+    </footer>
+  </main>
+
+  <script>
+    const photoboxConfig = {
+      recipientName: "My Best Friend",
+      senderName: "Your proud partner in every late-night story",
+      graduationYear: "2026",
+      messageLines: [
+        "Congratulations on your graduation. You carried so much effort, patience, and courage to get here, and today all of it shines back at you.",
+        "I hope you feel proud of yourself in the quiet moments too, because you truly earned this beautiful day and every clap that comes with it.",
+        "May your next chapter be full of kind people, brave beginnings, and the same light you brought with you while getting this far."
+      ],
+      photos: [
+        {
+          src: "https://unsplash.com/photos/nLvkR-qWlbs/download?force=true&w=1400",
+          alt: "Graduates raising their caps during a celebration"
+        },
+        {
+          src: "https://unsplash.com/photos/_pjaCisAdeE/download?force=true&w=1200",
+          alt: "Graduation cap seen up close in warm light"
+        },
+        {
+          src: "https://unsplash.com/photos/3Wd0YV0YPXE/download?force=true&w=1200",
+          alt: "Graduate celebrating while holding flowers"
+        },
+        {
+          src: "https://unsplash.com/photos/1K3JslMVm8M/download?force=true&w=1200",
+          alt: "Two graduates smiling during commencement"
+        },
+        {
+          src: "https://unsplash.com/photos/YylbVp8494U/download?force=true&w=1200",
+          alt: "Graduate in a cap and gown standing outdoors"
+        },
+        {
+          src: "https://unsplash.com/photos/B0gGDMmaU2c/download?force=true&w=1400",
+          alt: "Graduates celebrating together on a bright day"
+        }
+      ]
+    };
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const body = document.body;
+    const layers = [...document.querySelectorAll("[data-layer-panel]")];
+    const navButtons = [...document.querySelectorAll(".nav-button")];
+    const targetButtons = [...document.querySelectorAll("[data-target]")];
+    const nextButtons = [...document.querySelectorAll("[data-next]")];
+    const prevButtons = [...document.querySelectorAll("[data-prev]")];
+    const copyNoteButtons = [...document.querySelectorAll("[data-copy-note]")];
+    const resetButtons = [...document.querySelectorAll("[data-reset]")];
+    const nextGlobalButton = document.querySelector("[data-next-global]");
+    const prevGlobalButton = document.querySelector("[data-prev-global]");
+    const musicToggle = document.querySelector("[data-music-toggle]");
+    const bgMusic = document.querySelector("[data-bg-music]");
+    const photoTargets = [...document.querySelectorAll("[data-photo]")];
+
+    let currentLayer = 0;
+    let musicWanted = true;
+
+    function fillText() {
+      document.querySelectorAll("[data-recipient]").forEach((node) => {
+        node.textContent = photoboxConfig.recipientName;
+      });
+
+      document.querySelectorAll("[data-sender]").forEach((node) => {
+        node.textContent = photoboxConfig.senderName;
+      });
+
+      document.querySelectorAll("[data-year]").forEach((node) => {
+        node.textContent = photoboxConfig.graduationYear;
+      });
+
+      document.querySelectorAll("[data-line]").forEach((node) => {
+        const index = Number(node.dataset.line);
+        node.textContent = photoboxConfig.messageLines[index] || "";
+      });
+
+      photoTargets.forEach((node) => {
+        const index = Number(node.dataset.photo);
+        const photo = photoboxConfig.photos[index];
+        if (!photo) {
+          return;
+        }
+
+        node.src = photo.src;
+        node.alt = photo.alt;
+      });
+    }
+
+    function buildNoteText() {
+      return [
+        `Dear ${photoboxConfig.recipientName},`,
+        "",
+        ...photoboxConfig.messageLines,
+        "",
+        "With love and so much pride,",
+        photoboxConfig.senderName
+      ].join("\n");
+    }
+
+    function fallbackCopyText(text) {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+
+      let copied = false;
+      try {
+        copied = document.execCommand("copy");
+      } catch (error) {
+        copied = false;
+      }
+
+      document.body.removeChild(textarea);
+      return copied;
+    }
+
+    async function copyNote(button) {
+      const originalLabel = button.dataset.defaultLabel || button.textContent;
+      button.dataset.defaultLabel = originalLabel;
+      const noteText = buildNoteText();
+
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(noteText);
+          button.textContent = "Copied";
+        } else if (fallbackCopyText(noteText)) {
+          button.textContent = "Copied";
+        } else {
+          button.textContent = "Copy Failed";
+        }
+      } catch (error) {
+        button.textContent = fallbackCopyText(noteText) ? "Copied" : "Copy Failed";
+      }
+
+      window.setTimeout(() => {
+        button.textContent = originalLabel;
+      }, 1500);
+    }
+
+    function renderLayer(index) {
+      currentLayer = Math.max(0, Math.min(index, layers.length - 1));
+
+      layers.forEach((layer, layerIndex) => {
+        const isActive = layerIndex === currentLayer;
+        layer.classList.toggle("is-active", isActive);
+        layer.classList.toggle("is-past", layerIndex < currentLayer);
+        layer.classList.toggle("is-future", layerIndex > currentLayer);
+        layer.setAttribute("aria-hidden", String(!isActive));
+      });
+
+      navButtons.forEach((button, buttonIndex) => {
+        const isActive = buttonIndex === currentLayer;
+        button.classList.toggle("is-active", isActive);
+        if (isActive) {
+          button.setAttribute("aria-current", "true");
+        } else {
+          button.removeAttribute("aria-current");
+        }
+      });
+
+      if (prevGlobalButton) {
+        prevGlobalButton.disabled = currentLayer === 0;
+      }
+
+      if (nextGlobalButton) {
+        nextGlobalButton.disabled = currentLayer === layers.length - 1;
+      }
+    }
+
+    function updateMusicButton(labelOverride) {
+      if (!musicToggle) {
+        return;
+      }
+
+      const isPlaying = Boolean(bgMusic && !bgMusic.paused && !bgMusic.ended);
+      const label = labelOverride || (!bgMusic
+        ? "Music Unavailable"
+        : !musicWanted
+          ? "Music Off"
+          : isPlaying
+            ? "Music On"
+            : "Tap for Music");
+
+      musicToggle.textContent = label;
+      musicToggle.classList.toggle("is-active", isPlaying);
+      musicToggle.setAttribute("aria-pressed", String(isPlaying));
+    }
+
+    async function startMusic(fromAutoplay = false) {
+      if (!bgMusic || !musicWanted) {
+        updateMusicButton();
+        return;
+      }
+
+      bgMusic.volume = 0.34;
+      bgMusic.muted = false;
+
+      try {
+        await bgMusic.play();
+        updateMusicButton("Music On");
+      } catch (error) {
+        updateMusicButton(fromAutoplay ? "Tap for Music" : "Tap for Music");
+      }
+    }
+
+    function stopMusic() {
+      musicWanted = false;
+
+      if (bgMusic) {
+        bgMusic.pause();
+      }
+
+      updateMusicButton("Music Off");
+    }
+
+    async function toggleMusic() {
+      if (!bgMusic) {
+        updateMusicButton("Music Unavailable");
+        return;
+      }
+
+      if (bgMusic.paused) {
+        musicWanted = true;
+        await startMusic();
+        return;
+      }
+
+      stopMusic();
+    }
+
+    fillText();
+    renderLayer(0);
+    updateMusicButton();
+
+    navButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        renderLayer(Number(button.dataset.target));
+      });
+    });
+
+    targetButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        renderLayer(Number(button.dataset.target));
+      });
+    });
+
+    nextButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        renderLayer(currentLayer + 1);
+      });
+    });
+
+    prevButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        renderLayer(currentLayer - 1);
+      });
+    });
+
+    if (nextGlobalButton) {
+      nextGlobalButton.addEventListener("click", () => {
+        renderLayer(currentLayer + 1);
+      });
+    }
+
+    if (prevGlobalButton) {
+      prevGlobalButton.addEventListener("click", () => {
+        renderLayer(currentLayer - 1);
+      });
+    }
+
+    copyNoteButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        copyNote(button);
+      });
+    });
+
+    resetButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        renderLayer(0);
+        window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+      });
+    });
+
+    if (musicToggle) {
+      musicToggle.addEventListener("click", () => {
+        toggleMusic();
+      });
+    }
+
+    if (bgMusic) {
+      bgMusic.addEventListener("playing", () => {
+        updateMusicButton("Music On");
+      });
+
+      bgMusic.addEventListener("pause", () => {
+        updateMusicButton(musicWanted ? "Tap for Music" : "Music Off");
+      });
+
+      bgMusic.addEventListener("error", () => {
+        updateMusicButton("Music Unavailable");
+      });
+    }
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "ArrowRight") {
+        renderLayer(currentLayer + 1);
+      }
+
+      if (event.key === "ArrowLeft") {
+        renderLayer(currentLayer - 1);
+      }
+    });
+
+    ["pointerdown", "keydown", "touchstart"].forEach((eventName) => {
+      document.addEventListener(eventName, () => {
+        if (musicWanted) {
+          startMusic();
+        }
+      }, { once: true });
+    });
+
+    window.setTimeout(() => {
+      if (musicWanted) {
+        startMusic(true);
+      }
+    }, 350);
+
+    window.requestAnimationFrame(() => {
+      body.classList.add("is-ready");
+    });
+  </script>
+</body>
+</html>
