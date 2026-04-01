@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Graduation Story Pages</title>
+  <style>
+    :root {
+      --bg: #100b14;
+      --bg-soft: #201626;
+      --panel: rgba(255, 245, 232, 0.08);
+      --panel-strong: rgba(255, 245, 232, 0.12);
+      --line: rgba(255, 255, 255, 0.12);
+      --paper: #fff6eb;
+      --ink: #2d1d25;
+      --text: #fff7ef;
+      --muted: rgba(255, 247, 239, 0.74);
+      --accent: #ffc493;
+      --accent-strong: #ffab96;
+      --shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
+      --radius: 28px;
+      --radius-soft: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      color-scheme: dark;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 8%, rgba(255, 196, 147, 0.18), transparent 22%),
+        radial-gradient(circle at 90% 16%, rgba(255, 171, 150, 0.14), transparent 18%),
+        radial-gradient(circle at 50% 92%, rgba(255, 246, 235, 0.06), transparent 28%),
+        linear-gradient(145deg, #0d0912 0%, #1c1322 48%, #0e1320 100%);
+      overflow-x: hidden;
+    }
+
+    img {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+    }
+
+    .light-leak,
+    .grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .light-leak {
+      z-index: 0;
+      opacity: 0.92;
+      mix-blend-mode: screen;
+      background:
+        radial-gradient(circle at 14% 0%, rgba(255, 196, 147, 0.24), transparent 22%),
+        radial-gradient(circle at 88% 20%, rgba(255, 171, 150, 0.18), transparent 18%);
+    }
+
+    .grain {
+      z-index: 0;
+      opacity: 0.08;
+      background-image:
+        linear-gradient(transparent 0 48%, rgba(255, 255, 255, 0.05) 48% 52%, transparent 52% 100%),
+        radial-gradient(circle, rgba(255, 255, 255, 0.2) 1px, transparent 1px);
+      background-size: 100% 5px, 13px 13px;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      width: min(1080px, calc(100% - 1rem));
+      margin: 0 auto;
+      padding: 0.75rem 0 1.5rem;
+    }
+
+    .hero {
+      margin-bottom: 0.85rem;
+      padding: clamp(1.2rem, 4vw, 2rem);
+      border: 1px solid var(--line);
+      border-radius: calc(var(--radius) + 4px);
+      background: linear-gradient(180deg, rgba(255, 245, 232, 0.08), rgba(255, 245, 232, 0.04));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .eyebrow,
+    .layer-index,
+    .music-note,
+    .photo-credit {
+      margin: 0;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.74rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .hero h1,
+    .layer-copy h2,
+    .letter-sheet h3 {
+      margin: 0;
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+    }
+
+    .hero h1 {
+      max-width: 11ch;
+      font-size: clamp(2.9rem, 9vw, 5.7rem);
+    }
+
+    .hero p {
+      margin: 0;
+    }
+
+    .hero-text {
+      max-width: 42rem;
+      margin-top: 1rem;
+      font-size: clamp(1rem, 2vw, 1.08rem);
+      line-height: 1.78;
+      color: var(--muted);
+    }
+
+    .music-note {
+      margin-top: 1rem;
+      color: rgba(255, 247, 239, 0.62);
+    }
+
+    .story {
+      display: grid;
+      gap: 1rem;
+      scroll-snap-type: y proximity;
+    }
+
+    .layer {
+      min-height: min(100svh, 900px);
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(300px, 0.95fr);
+      gap: clamp(1rem, 3vw, 1.4rem);
+      align-items: center;
+      padding: clamp(1rem, 3vw, 1.5rem);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, rgba(255, 245, 232, 0.08), rgba(255, 245, 232, 0.04)),
+        linear-gradient(145deg, #1e1525, #121523);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      scroll-snap-align: start;
+      opacity: 0.78;
+      transform: translateY(24px);
+      transition:
+        opacity 0.5s ease,
+        transform 0.5s ease,
+        border-color 0.5s ease;
+    }
+
+    .layer.is-active {
+      opacity: 1;
+      transform: translateY(0);
+      border-color: rgba(255, 196, 147, 0.32);
+    }
+
+    .photo-card,
+    .letter-sheet {
+      border-radius: 26px;
+      overflow: hidden;
+      box-shadow: 0 22px 44px rgba(0, 0, 0, 0.22);
+    }
+
+    .photo-card {
+      position: relative;
+      min-height: 420px;
+      background: rgba(255, 245, 232, 0.08);
+    }
+
+    .photo-card.is-missing {
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(180deg, rgba(255, 245, 232, 0.08), rgba(255, 245, 232, 0.04)),
+        linear-gradient(145deg, #2a1d33, #171825);
+    }
+
+    .photo-card img {
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .photo-card.is-missing img {
+      opacity: 0;
+    }
+
+    .photo-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255, 245, 232, 0.04), rgba(0, 0, 0, 0.08));
+      pointer-events: none;
+    }
+
+    .photo-meta {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 1rem 1.1rem;
+      background: linear-gradient(180deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.72));
+    }
+
+    .photo-meta strong {
+      display: block;
+      margin-bottom: 0.35rem;
+      font-size: 1.22rem;
+    }
+
+    .photo-meta span {
+      font-size: 0.98rem;
+      line-height: 1.6;
+      color: rgba(255, 247, 239, 0.82);
+    }
+
+    .photo-placeholder {
+      position: absolute;
+      inset: 0;
+      display: none;
+      place-items: center;
+      padding: 1.2rem;
+      text-align: center;
+      z-index: 1;
+    }
+
+    .photo-card.is-missing .photo-placeholder {
+      display: grid;
+    }
+
+    .photo-placeholder span {
+      max-width: 18rem;
+      padding: 1rem 1.1rem;
+      border: 1px dashed rgba(255, 255, 255, 0.24);
+      border-radius: 22px;
+      background: rgba(255, 245, 232, 0.07);
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255, 247, 239, 0.82);
+    }
+
+    .layer-copy {
+      display: grid;
+      gap: 1rem;
+      align-content: center;
+    }
+
+    .layer-copy h2,
+    .letter-sheet h3 {
+      font-size: clamp(2.1rem, 5vw, 3.6rem);
+    }
+
+    .layer-copy p,
+    .letter-sheet p {
+      margin: 0;
+      font-size: 1.02rem;
+      line-height: 1.82;
+      color: var(--muted);
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+    }
+
+    .chip {
+      padding: 0.52rem 0.72rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 245, 232, 0.08);
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+
+    .letter-sheet {
+      position: relative;
+      padding: clamp(1.2rem, 4vw, 1.7rem);
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(255, 246, 235, 0.98), rgba(248, 234, 215, 0.98)),
+        linear-gradient(90deg, rgba(255, 171, 150, 0.1), transparent 35%);
+    }
+
+    .letter-sheet::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          transparent 0,
+          transparent 35px,
+          rgba(117, 94, 80, 0.09) 35px,
+          rgba(117, 94, 80, 0.09) 36px
+        );
+      pointer-events: none;
+      opacity: 0.65;
+    }
+
+    .letter-sheet > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .letter-sheet p {
+      color: rgba(45, 29, 37, 0.82);
+    }
+
+    .letter-sheet .eyebrow {
+      color: rgba(45, 29, 37, 0.58);
+    }
+
+    .signature {
+      display: grid;
+      gap: 0.25rem;
+      padding-top: 0.3rem;
+    }
+
+    .signature strong {
+      font-size: 1.02rem;
+    }
+
+    .photo-credit {
+      margin-top: 0.8rem;
+      color: rgba(255, 247, 239, 0.58);
+    }
+
+    @media (max-width: 900px) {
+      .layer {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+
+      .photo-card {
+        min-height: 360px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .app {
+        width: min(100%, calc(100% - 0.6rem));
+      }
+
+      .hero,
+      .layer {
+        border-radius: 24px;
+      }
+
+      .photo-card,
+      .letter-sheet {
+        border-radius: 22px;
+      }
+
+      .photo-card {
+        min-height: 300px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition-duration: 0.01ms !important;
+        transition-delay: 0ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="light-leak" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <audio data-bg-music autoplay loop preload="auto" playsinline>
+    <source src="assets/audio/bg-music.mp3" type="audio/mpeg">
+  </audio>
+
+  <main class="app">
+    <header class="hero">
+      <p class="eyebrow">Graduation story / mobile friendly / local assets only</p>
+      <h1>Four quiet pages for one very proud graduation day.</h1>
+      <p class="hero-text">
+        Dear <span data-recipient></span>, this page is now built as a clean vertical story for mobile.
+        There are no buttons, each section feels like its own page, and every photo uses a local path that
+        you can replace later inside the assets/photos folder.
+      </p>
+      <p class="music-note" data-music-note>Autoplay music is trying to start. Some browsers may wait for your first touch.</p>
+    </header>
+
+    <section class="story">
+      <article class="layer is-active" data-layer>
+        <figure class="photo-card">
+          <img data-local-photo src="assets/photos/page-1.jpg" alt="Graduation photo for page one">
+          <div class="photo-placeholder" aria-hidden="true">
+            <span>Place your photo at assets/photos/page-1.jpg</span>
+          </div>
+          <figcaption class="photo-meta">
+            <strong>Page 01</strong>
+            <span>The opening frame belongs to the version of you that kept going.</span>
+          </figcaption>
+        </figure>
+
+        <div class="layer-copy">
+          <p class="layer-index">Page 01 / the spotlight</p>
+          <h2>Dear <span data-recipient></span>, today looks so good on you.</h2>
+          <p>
+            This first layer is the bright beginning. It carries the quiet proof that every long night,
+            every deadline, and every tired morning really led to something worth holding close.
+          </p>
+
+          <div class="chip-row" aria-hidden="true">
+            <span class="chip">class of <span data-year></span></span>
+            <span class="chip">local photos</span>
+            <span class="chip">mobile first</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="layer" data-layer>
+        <figure class="photo-card">
+          <img data-local-photo src="assets/photos/page-2.jpg" alt="Graduation photo for page two">
+          <div class="photo-placeholder" aria-hidden="true">
+            <span>Place your photo at assets/photos/page-2.jpg</span>
+          </div>
+          <figcaption class="photo-meta">
+            <strong>Page 02</strong>
+            <span>Some memories feel tiny at first and then stay forever.</span>
+          </figcaption>
+        </figure>
+
+        <div class="layer-copy">
+          <p class="layer-index">Page 02 / the little details</p>
+          <h2>The day is made of small flashes and big feelings.</h2>
+          <p>
+            Here is the softer middle of the story: the small details, the proud breath, the quiet smile,
+            and the moment you finally realize that this graduation is truly yours.
+          </p>
+
+          <div class="chip-row" aria-hidden="true">
+            <span class="chip">soft light</span>
+            <span class="chip">steady heart</span>
+            <span class="chip">future near</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="layer" data-layer>
+        <div class="letter-sheet">
+          <p class="eyebrow">Page 03 / the letter</p>
+          <h3>Congratulations on your graduation, <span data-recipient></span>.</h3>
+
+          <p data-line="0"></p>
+          <p data-line="1"></p>
+          <p data-line="2"></p>
+
+          <div class="signature">
+            <span>With love and so much pride,</span>
+            <strong data-sender></strong>
+          </div>
+        </div>
+
+        <div class="layer-copy">
+          <figure class="photo-card">
+            <img data-local-photo src="assets/photos/page-3.jpg" alt="Graduation photo for page three">
+            <div class="photo-placeholder" aria-hidden="true">
+              <span>Place your photo at assets/photos/page-3.jpg</span>
+            </div>
+            <figcaption class="photo-meta">
+              <strong>Page 03</strong>
+              <span>The words stay simple so the feeling can stay honest.</span>
+            </figcaption>
+          </figure>
+        </div>
+      </article>
+
+      <article class="layer" data-layer>
+        <figure class="photo-card">
+          <img data-local-photo src="assets/photos/page-4.jpg" alt="Graduation photo for page four">
+          <div class="photo-placeholder" aria-hidden="true">
+            <span>Place your photo at assets/photos/page-4.jpg</span>
+          </div>
+          <figcaption class="photo-meta">
+            <strong>Page 04</strong>
+            <span>The last page now uses a local file path, so it will not depend on an external image link.</span>
+          </figcaption>
+        </figure>
+
+        <div class="layer-copy">
+          <p class="layer-index">Page 04 / the afterglow</p>
+          <h2>Your future already feels bright from here.</h2>
+          <p>
+            This final frame closes the page gently. Graduation is not only an ending.
+            It is the first clear picture of every brave, kind, exciting thing that gets to happen next.
+          </p>
+
+          <p class="photo-credit">Replace the four local image files yourself later and the pages will update automatically.</p>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    const pageConfig = {
+      recipientName: "My Best Friend",
+      senderName: "Your proud partner in every late-night story",
+      graduationYear: "2026",
+      messageLines: [
+        "Congratulations on your graduation. You carried so much effort, patience, and courage to get here, and today all of it shines back at you.",
+        "I hope you feel proud of yourself in the quiet moments too, because you truly earned this beautiful day and every clap that comes with it.",
+        "May your next chapter be full of kind people, brave beginnings, and the same light you brought with you while getting this far."
+      ]
+    };
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const body = document.body;
+    const bgMusic = document.querySelector("[data-bg-music]");
+    const musicNote = document.querySelector("[data-music-note]");
+    const layers = [...document.querySelectorAll("[data-layer]")];
+    const localPhotos = [...document.querySelectorAll("[data-local-photo]")];
+
+    function fillText() {
+      document.querySelectorAll("[data-recipient]").forEach((node) => {
+        node.textContent = pageConfig.recipientName;
+      });
+
+      document.querySelectorAll("[data-sender]").forEach((node) => {
+        node.textContent = pageConfig.senderName;
+      });
+
+      document.querySelectorAll("[data-year]").forEach((node) => {
+        node.textContent = pageConfig.graduationYear;
+      });
+
+      document.querySelectorAll("[data-line]").forEach((node) => {
+        const index = Number(node.dataset.line);
+        node.textContent = pageConfig.messageLines[index] || "";
+      });
+    }
+
+    async function tryStartMusic(fromAutoplay = false) {
+      if (!bgMusic) {
+        if (musicNote) {
+          musicNote.textContent = "Music file not found.";
+        }
+        return;
+      }
+
+      bgMusic.volume = 0.34;
+      bgMusic.muted = false;
+
+      try {
+        await bgMusic.play();
+        if (musicNote) {
+          musicNote.textContent = "Music is playing from a local file in this project.";
+        }
+      } catch (error) {
+        if (musicNote) {
+          musicNote.textContent = fromAutoplay
+            ? "Your browser is waiting for a touch before playing music."
+            : "Tap or scroll once and the music will try again.";
+        }
+      }
+    }
+
+    function observeLayers() {
+      if (!("IntersectionObserver" in window) || reduceMotion) {
+        return;
+      }
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            layers.forEach((layer) => layer.classList.remove("is-active"));
+            entry.target.classList.add("is-active");
+          }
+        });
+      }, {
+        threshold: 0.55
+      });
+
+      layers.forEach((layer) => observer.observe(layer));
+    }
+
+    function markMissingPhotos() {
+      localPhotos.forEach((photo) => {
+        const card = photo.closest(".photo-card");
+        if (!card) {
+          return;
+        }
+
+        photo.addEventListener("error", () => {
+          card.classList.add("is-missing");
+        });
+
+        photo.addEventListener("load", () => {
+          card.classList.remove("is-missing");
+        });
+      });
+    }
+
+    fillText();
+    observeLayers();
+    markMissingPhotos();
+
+    ["pointerdown", "touchstart", "keydown", "scroll"].forEach((eventName) => {
+      document.addEventListener(eventName, () => {
+        tryStartMusic();
+      }, { once: true, passive: true });
+    });
+
+    window.setTimeout(() => {
+      tryStartMusic(true);
+    }, 280);
+
+    window.requestAnimationFrame(() => {
+      body.classList.add("is-ready");
+    });
+  </script>
+</body>
+</html>
